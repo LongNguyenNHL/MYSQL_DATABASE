@@ -160,3 +160,54 @@ AND room_id = (
 ;
 
 -- 22
+SELECT film_id, COUNT(film_id) AS total_screening
+FROM screening
+GROUP BY film_id
+HAVING COUNT(film_id) > 10
+ORDER BY total_screening;
+
+-- 23
+SELECT DATE(start_time) AS date_time, COUNT(booking.id) AS total_booking
+FROM booking
+JOIN screening
+ON booking.screening_id = screening.id
+GROUP BY DATE(start_time);
+
+-- 24
+WITH count_seat AS (
+	SELECT room_id, COUNT(room_id) AS total_seat
+	FROM seat
+	GROUP BY room_id
+)  
+
+SELECT screening_id, film_id, screening.room_id, COUNT(booking.id) / total_seat * 100 AS rate
+FROM booking
+JOIN screening
+ON booking.screening_id = screening.id
+JOIN count_seat
+ON screening.room_id = count_seat.room_id
+GROUP BY screening_id, film_id, screening.room_id
+ORDER BY rate DESC;
+
+-- 25
+WITH count_seat AS (
+	SELECT room_id, COUNT(room_id) AS total_seat
+	FROM seat
+	GROUP BY room_id
+),
+rate_table AS ( 
+	SELECT screening_id, film_id, screening.room_id, COUNT(booking.id) / total_seat * 100 AS rate
+	FROM booking
+	JOIN screening
+	ON booking.screening_id = screening.id
+	JOIN count_seat
+	ON screening.room_id = count_seat.room_id
+	GROUP BY screening_id, film_id, screening.room_id
+	ORDER BY rate DESC
+)
+
+SELECT * 
+FROM rate_table
+WHERE rate > (SELECT AVG(rate) FROM rate_table);
+
+-- 26
