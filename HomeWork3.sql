@@ -211,3 +211,12 @@ FROM rate_table
 WHERE rate > (SELECT AVG(rate) FROM rate_table);
 
 -- 26
+SELECT customer_id, SUM(length_min) AS total_length
+FROM booking
+LEFT JOIN screening
+	ON booking.screening_id = screening.id
+LEFT JOIN film
+	ON screening.film_id = film.id
+GROUP BY customer_id
+ORDER BY total_length
+LIMIT 2
